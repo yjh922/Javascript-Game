@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        #stage {
+            width: 420px;
+            height: 660px;
+            margin: auto;
+            border: 5px solid black;
+            box-sizing: border-box;
+            position: relative;
+            overflow: hidden;
+            border-radius: 5px;
+
+
+        }
+
+        #gaugebox {
+            width: 300px;
+            height: 25px;
+            position: absolute;
+            left: 60px;
+            top: 10px;
+            z-index: 1;
+            border: 2px solid yellow;
+            border-radius: 5px;
+            box-sizing: border-box;
+            background: black;
+            display: none;
+
+        }
+
+        #score {
+            width: 100px;
+            height: 45px;
+
+            position: absolute;
+            left: 160px;
+            top: 35px;
+            z-index: 1;
+            font-size: 45px;
+            font-weight: bold;
+            color: black;
+            text-align: center;
+            display: none;
+
+        }
+        #coinbox{
+            width: 80px;
+            height: 30px;
+            position: absolute;
+            left: 320px;
+            top: 50px;
+            background: black;
+            border-radius: 5px;
+            box-sizing: border-box;
+            z-index: 1;
+            font-size: 20px;
+            color: yellow;
+            display: none;
+            text-align: right;
+        }
+      
+   
+    </style>
+    <script src="./GameObject.js"></script>
+    <script src="./map.js"></script>
+    <script src="./Hero.js"></script>
+    <script src="./Brick.js"></script>
+    <script src="./GoalFlag.js"></script>
+    <script src="./Coin.js"></script>
+
+    <script>
+        let stage;
+        let bg;
+        let hero;
+        let change;
+        let up;
+        let start;
+        let gameover;
+        let mapArray = [map1];
+        let level = 0;
+        let brickArray = [];
+        let x_map;//주인공의 배열에서의  x index 위치
+        let y_map;//주인공의 배열에서의 y index위치
+        let flag = false;
+        let goalFlag;
+        let gauge;
+        let score;
+        let gaugebox;
+        let count = 0;//스코어를 누적시킬 변수
+        let targetX = 200;
+        let gameFlag = false;
+        let gaugeStop;
+        let coinArray = [];
+        let gaugeFlag = false;
+        let startFlag = true;
+        let coinbox;
+        let coincount=0;
+        let use;
+
+
+        //주인공 없어지는 함수
+        function gameOver() {
+
+            //키보드에 의한 위치 배열의 커서 이동
+            if (flag) {
+                x_map++;
+                y_map--;
+            } else {
+                x_map--;
+                y_map--;
+            }
+
+            //주인공이 밟고 있고 벽돌의  위치 조사 및 배열의 값 조사
+            let footIndex = map1[y_map + 1][x_map];
+            //console.log(footIndex);
+
+            //조사하기
+            if (footIndex == !1) {
+                over();
+                score.innerText = count - 1;
+            }
+
+        }
+        let meetCoinCount=-1;
+        function coinRemove(){
+        
+            let coinIndex=map1[y_map][x_map];
+            console.log(coinIndex);
+            
+            if(coinIndex==4){
+                meetCoinCount++;
+                stage.removeChild(coinArray[meetCoinCount].img);
+                coincount+=10;
+                coinbox.innerText=coincount;
+            }       
+        }
+
+        function over() {
+            hero.velY = 3;
+            gameover = new GameObject(stage, "./images/over.png", 300, 300, 60, 165, 0, 0);
+            change.img.style.display = "none";
+            up.img.style.display = "none";
+            gauge.style.width = 0 + "px";
+            gaugeFlag = false;
+            gameFlag = false;
+            startFlag=false;
+        }
+
+
+
+        function goal() {
+            let goal = map1[y_map][x_map];
+            if (goal == 3) {
+                goalFlag.img.style.width = 250 + "px";
+                goalFlag.img.style.height = 300 + "px";
+                goalFlag.y -= 300;
+
+                change.img.style.display = "none";
+                up.img.style.display = "none";
+                gaugeFlag = false;
+                gameFlag = false;
+                startFlag=false;
+            }
+        }
+
+        function moveUp(n, p, z) {
+            count++;
+            score.innerText = count;
+            
+            gameOver();
+            goal();
+            coinRemove();
+
+            //벽돌을 움직이는 코드
+            for (let i = 0; i < brickArray.length; i++) {
+                if (flag) {
+                    brickArray[i].x += -n;
+                    brickArray[i].y += p;
+                } else {
+                    brickArray[i].x += n;
+                    brickArray[i].y += p;
+                }
+                brickArray[i].render();
+            }
+
+            //코인을 움직이는 코드
+            for (let i = 0; i < coinArray.length; i++) {
+                if (flag) {
+                    coinArray[i].x += -n;
+                    coinArray[i].y += p;
+                } else {
+                    coinArray[i].x += n;
+                    coinArray[i].y += p;
+                }
+                coinArray[i].render();
+            }
+
+            if (flag) {
+                bg.x += -z;
+                bg.y += z;
+            } else {
+                bg.x += z;
+                bg.y += z;
+            }
+        }
+
+        function moveChange() {
+            count++;
+            score.innerText = count;
+            gameOver();
+            goal();          
+            coinRemove();
+
+            if (flag) {
+                hero.img.style.transform = "scaleX(-1)";
+                for (let i = 0; i < brickArray.length; i++) {
+                    brickArray[i].x += -60;
+                    brickArray[i].y += 30;
+                    brickArray[i].render();
+                }
+            } else {
+                hero.img.style.transform = "scaleX(1)";
+                for (let i = 0; i < brickArray.length; i++) {
+                    brickArray[i].x += 60;
+                    brickArray[i].y += 30;
+                    brickArray[i].render();
+                }
+            }
+            if (flag) {
+                hero.img.style.transform = "scaleX(-1)";
+                for (let i = 0; i < coinArray.length; i++) {
+                    coinArray[i].x += -60;
+                    coinArray[i].y += 30;
+                    coinArray[i].render();
+                }
+            } else {
+                hero.img.style.transform = "scaleX(1)";
+                for (let i = 0; i < coinArray.length; i++) {
+                    coinArray[i].x += 60;
+                    coinArray[i].y += 30;
+                    coinArray[i].render();
+                }
+            }
+        }
+
+        //주인공의 위치를 알아보는 함수
+        function getHeroXYInMap() {
+            for (let a = 0; a < map1.length; a++) {
+                for (let i = 0; i < map1[a].length; i++) {
+                    if (map1[a][i] == 2) {
+                        x_map = i;
+                        y_map = a;
+                    }
+                }
+            }
+        }
+
+        function gameOverGauge() {
+            //gauge.style.width = parseFloat(gauge.style.width) + a * (targetX - parseFloat(gage.style.width)) + "px";
+            if (gaugeFlag) {
+                if (brickArray[10].y < hero.y + hero.height) {
+                    targetX -= 3;
+
+                }else if (brickArray[20].y < hero.y + hero.height) {
+                    targetX -= 7;
+                }else if (brickArray[40].y < hero.y + hero.height) {
+                    targetX -= 10;
+                } else if (brickArray[70].y < hero.y + hero.height) {
+                    targetX -= 15;
+                } else if (brickArray[70].y >= hero.y + hero.height) {
+                    targetX -= 20;
+                }
+                gauge.style.width = targetX + "px";
+                
+                if (parseInt(gauge.style.width) >= 300) {
+                    gauge.style.width = 296 + "px";
+                } else if (parseInt(gauge.style.width)<=20){
+                    gauge.style.width = 0 + "px";
+                    over();
+                }
+            }
+        }
+
+        function createGauge() {
+            gauge = document.createElement("div");
+            gauge.style.width = 200+ "px";
+            gauge.style.height = +100 + "%";
+            gauge.style.background = "red";
+            gauge.style.borderRadius = 3 + "px";
+            gaugebox.appendChild(gauge);
+        }
+
+        function createGameObject() {
+            //주인공과 벽돌 생성
+            for (let a = mapArray[level].length - 1; a >= 0; a--) {
+                for (let i = 0; i < mapArray[level][a].length; i++) {
+                    if (mapArray[level][a][i] == 1) {
+                        let brick = new Brick(stage, "./images/brick.png", 60, 30, -520 + (i * 60), -2550 + (a * 30), 0, 0);
+                        brickArray.push(brick);
+                    } else if (mapArray[level][a][i] == 2) {
+                        hero = new Hero(stage, "./images/char.png", 60, 150, -520 + (i * 60), -2670 + (a * 30), 0, 0);
+                    } else if (mapArray[level][a][i] == 3) {
+                        goalFlag = new GoalFlag(stage, "./images/flag.png", 60, 60, -520 + (i * 60), -2550 - 30 + (a * 30), 0, 0);
+                        brickArray.push(goalFlag);
+                    } else if (mapArray[level][a][i] == 4) {
+                        let coin = new Coin(stage, "./images/coin.png", 50, 30, -520 + (i *60), -2550 + (a * 30), 0, 0);
+                        coinArray.push(coin);
+                    }
+                }
+            }
+            //키보드 조작 키 생성
+            change = new GameObject(stage, "./images/change.png", 90, 90, 20, 550, 0, 0);
+            up = new GameObject(stage, "./images/up.png", 90, 90, 300, 550, 0, 0);
+            change.img.style.display = "none";
+            up.img.style.display = "none";
+            //게임 스타트 생성
+            start = new GameObject(stage, "./images/start.png", 100, 100, 160, 500, 0, 0);
+
+            //게임 제목 생성
+            stairs = new GameObject(stage, "./images/stairs.png", 250, 250, 85, 210, 0, 0);
+
+            //게임 방법 이미지
+            use=new GameObject(stage, "./images/img.png", 300, 200, 60, 0, 0, 0);
+        }
+
+        function createBg() {
+            bg = new GameObject(stage, "./images/img.webp", 1320, 3000, -420, -2000, 0, 0);
+        }
+
+        function init() {
+            stage = document.getElementById("stage");
+            gauge = document.getElementById("gauge");
+            score = document.getElementById("score");
+            gaugebox = document.getElementById("gaugebox");
+            coinbox=document.getElementById("coinbox");
+            score.innerText = count;
+            coinbox.innerText=coincount;
+            createBg();
+            createGameObject();
+            getHeroXYInMap();
+            createGauge();
+        }
+
+        function loop() {
+            hero.tick();
+            hero.render();
+            if (gameFlag) {
+                bg.tick();
+                bg.render();
+            }
+        }
+
+        addEventListener("load", function () {
+            init();
+            setInterval("loop()", 10);
+            gaugeStop = setInterval("gameOverGauge()", 300);
+
+            document.body.addEventListener("keydown", function (e) {
+                //console.log(e.keyCode);
+                switch (e.keyCode) {
+                    case 13:
+                        if (startFlag) {
+                            gameFlag = true;
+                            start.img.style.display = "none";
+                            stairs.img.style.display = "none";
+                            use.img.style.display="none";
+                            change.img.style.display = "block";
+                            up.img.style.display = "block";
+                            gaugebox.style.display = "block";
+                            coinbox.style.display = "block";
+                            hero.img.style.zIndex = 99;
+                            score.style.display = "block";
+                            let pause = new GameObject(stage, "./images/pause.png", 30, 35, 370, 8, 0, 0);           
+                        }
+                        break;
+                    case 38:
+                        if (gameFlag) {
+                            gaugeFlag = true;
+                            moveUp(60, 30, 20);
+                            targetX += 7;
+                        };
+                        break;
+                    case 32:
+                        if (gameFlag) {
+                            gaugeFlag = true;
+                            moveChange(flag = !flag);
+                            targetX += 7;
+                        };
+                        break;
+                    case 27:
+
+                        gameFlag = !gameFlag;
+                        gaugeFlag = !gaugeFlag;
+                        break;
+                }
+            });
+
+        });
+
+    </script>
+</head>
+
+<body>
+    <div id="stage">
+        <div id="gaugebox"></div>
+        <div id="score"></div>
+        <div id="coinbox"></div>
+        
+    </div>
+</body>
+
+</html>

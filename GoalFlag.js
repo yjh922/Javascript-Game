@@ -1,0 +1,3 @@
+class GoalFlag extends GameObject{
+    
+}
