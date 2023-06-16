@@ -179,7 +179,7 @@
                 goalFlag.img.style.width = 250 + "px";
                 goalFlag.img.style.height = 300 + "px";
                 goalFlag.y -= 300;
-
+                goalFlag.x -= 50;
                 change.img.style.display = "none";
                 up.img.style.display = "none";
                 gaugeFlag = false;
@@ -310,7 +310,7 @@
                     } else if (mapArray[level][a][i] == 2) {
                         hero = new Hero(stage, "./images/char.png", 60, 150, -520 + (i * 60), -2680 + (a * 30), 0, 0);
                     } else if (mapArray[level][a][i] == 3) {
-                        goalFlag = new GoalFlag(stage, "./images/flag.png", 60, 60, -520 + (i * 60), -2560 - 30 + (a * 30), 0, 0);
+                        goalFlag = new GoalFlag(stage, "./images/flag1.png", 60, 60, -530 + (i * 60), -2560 - 30 + (a * 30), 0, 0);
                         brickArray.push(goalFlag);
                     } else if (mapArray[level][a][i] == 4) {
                         let coin = new Coin(stage, "./images/coin.png", 50, 30, -520 + (i * 60), -2560 + (a * 30), 0, 0);
