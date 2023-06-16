@@ -115,9 +115,7 @@
         let meetCoinCount = -1;
         let coinimg;
         let coinbox;
-        let gaugespeed=100;
-        let gaugespeedFlag=true;
-        
+
 
         //주인공의 위치를 알아보는 함수
         function getHeroXYInMap() {
@@ -144,6 +142,7 @@
             //주인공이 밟고 있고 벽돌의  위치 조사 및 배열의 값 조사
             let footIndex = map1[y_map + 1][x_map];
             //console.log(footIndex);
+
             if (footIndex == !1) {
                 over();
                 score.innerText = count - 1;
@@ -188,7 +187,6 @@
                 startFlag = false;
             }
         }
-
         //오르기 함수
         function moveUp(n, p, z) {
             count++;
@@ -269,29 +267,26 @@
 
         //게이지 함수
         function gameOverGauge() {
-            if(gaugeFlag){
-                targetX-=1;
+            if (gaugeFlag) {
                 if (brickArray[10].y < hero.y + hero.height) {
-                    gaugespeed=50;
+                    targetX -= 3;
                 } else if (brickArray[20].y < hero.y + hero.height) {
-                    gaugespeed=30;
+                    targetX -= 7;
                 } else if (brickArray[40].y < hero.y + hero.height) {
-                    gaugespeed=20;
+                    targetX -= 10;
                 } else if (brickArray[70].y < hero.y + hero.height) {
-                    gaugespeed=15;
+                    targetX -= 15;
                 } else if (brickArray[70].y >= hero.y + hero.height) {
-                    gaugespeed=10;
+                    targetX -= 20;
                 }
                 gauge.style.width = targetX + "px";
 
                 if (parseInt(gauge.style.width) >= 300) {
                     gauge.style.width = 296 + "px";
                 } else if (parseInt(gauge.style.width) <= 0) {
+                    gauge.style.width = 0 + "px";
                     over();
                 }
-            }
-            if(gaugespeedFlag){
-                setTimeout("gameOverGauge()",gaugespeed);
             }
         }
         
@@ -323,7 +318,6 @@
                     }
                 }
             }
-            
             //키보드 조작 키 생성
             change = new GameObject(stage, "./images/change.png", 90, 90, 20, 550, 0, 0);
             up = new GameObject(stage, "./images/up.png", 90, 90, 300, 550, 0, 0);
@@ -358,7 +352,6 @@
             createGameObject();
             getHeroXYInMap();
             createGauge();
-            gameOverGauge();
         }
 
         function loop() {
@@ -373,7 +366,8 @@
         addEventListener("load", function () {
             init();
             setInterval("loop()", 10);
-            
+            setInterval("gameOverGauge()", 300);
+
             document.body.addEventListener("keydown", function (e) {
                 //console.log(e.keyCode);
                 switch (e.keyCode) {
@@ -397,14 +391,14 @@
                         if (gameFlag) {
                             gaugeFlag = true;
                             moveUp(60, 30, 20);
-                            targetX += 10;
+                            targetX += 7;
                         };
                         break;
                     case 32:
                         if (gameFlag) {
                             gaugeFlag = true;
                             moveChange(flag = !flag);
-                            targetX += 10;
+                            targetX += 7;
                         };
                         break;
                     case 27:
